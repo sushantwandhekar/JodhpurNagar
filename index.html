@@ -3,13 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RSS जोधपुर नगर - शाखा उपस्थिति ऐप</title>
+  <title>RSS जोधपुर नगर - शाखा उपस्थिति एवं प्रबंधन</title>
   
-  <!-- Tailwind CSS & Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <!-- Chart.js for Analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
@@ -38,22 +36,22 @@
 </head>
 <body class="min-h-screen text-stone-800 flex flex-col">
 
-  <!-- शीर्ष हेडर (RSS थीम) -->
+  <!-- Header -->
   <header class="bhagwa-gradient text-white shadow-lg sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-3">
         <span class="text-3xl text-amber-200">🚩</span>
         <div>
           <h1 class="font-bold text-xl md:text-2xl tracking-wide">राष्ट्रीय स्वयंसेवक संघ</h1>
-          <p class="text-xs text-orange-100">जोधपुर नगर - दैनिक शाखा उपस्थिति एवं प्रबंधन</p>
+          <p class="text-xs text-orange-100">जोधपुर नगर - शाखा प्रबंधन</p>
         </div>
       </div>
       
-      <!-- दायित्व / कार्यकर्ता चयन बटन -->
+      <!-- User profile & role switcher -->
       <div class="flex items-center space-x-2">
         <div class="text-right hidden sm:block">
-          <p id="currentUserName" class="text-sm font-bold">सुशांत वांढेकर</p>
-          <p id="currentUserRole" class="text-xs text-orange-200">शाखा कार्यवाह (दिव्यजोत)</p>
+          <p id="currentUserName" class="text-sm font-bold">कार्यकर्ता</p>
+          <p id="currentUserRole" class="text-xs text-orange-200">दायित्व</p>
         </div>
         <button onclick="openLoginModal()" class="bg-amber-100 hover:bg-white text-saffron-900 px-3 py-1.5 rounded-lg text-xs font-semibold shadow flex items-center gap-1.5 transition">
           <i class="fa-solid fa-user-shield"></i> <span>दायित्व बदलें</span>
@@ -62,7 +60,7 @@
     </div>
   </header>
 
-  <!-- नेविगेशन टैब्स -->
+  <!-- Navigation Tabs -->
   <nav class="bg-white border-b border-orange-200 sticky top-[65px] z-40 shadow-sm overflow-x-auto">
     <div class="max-w-7xl mx-auto px-2 flex space-x-1 sm:space-x-2 whitespace-nowrap text-sm font-semibold text-stone-600">
       <button onclick="switchTab('attendance')" id="tab-attendance" class="px-3 sm:px-4 py-3 tab-active flex items-center gap-2 rounded-t-lg">
@@ -72,7 +70,10 @@
         <i class="fa-solid fa-chart-line text-saffron-600"></i> उपस्थिति सांख्यिकी (Analytics)
       </button>
       <button onclick="switchTab('directory')" id="tab-directory" class="px-3 sm:px-4 py-3 flex items-center gap-2 rounded-t-lg">
-        <i class="fa-solid fa-users-gear"></i> स्वयंसेवक सूची व संपादन
+        <i class="fa-solid fa-users"></i> स्वयंसेवक सूची
+      </button>
+      <button onclick="switchTab('samay')" id="tab-samay" class="px-3 sm:px-4 py-3 flex items-center gap-2 rounded-t-lg">
+        <i class="fa-solid fa-calendar-days"></i> समय सारिणी
       </button>
       <button onclick="switchTab('routine')" id="tab-routine" class="px-3 sm:px-4 py-3 flex items-center gap-2 rounded-t-lg">
         <i class="fa-solid fa-list-check"></i> दैनिक गतिविधि
@@ -80,50 +81,36 @@
       <button onclick="switchTab('uniform')" id="tab-uniform" class="px-3 sm:px-4 py-3 flex items-center gap-2 rounded-t-lg">
         <i class="fa-solid fa-shirt"></i> गणवेश स्थिति
       </button>
-      <button onclick="switchTab('samay')" id="tab-samay" class="px-3 sm:px-4 py-3 flex items-center gap-2 rounded-t-lg">
-        <i class="fa-solid fa-calendar-days"></i> समय सारिणी
-      </button>
       <button onclick="switchTab('courses')" id="tab-courses" class="px-3 sm:px-4 py-3 flex items-center gap-2 rounded-t-lg">
         <i class="fa-solid fa-place-of-worship"></i> शाखा सूची (नगर)
       </button>
     </div>
   </nav>
 
-  <!-- मुख्य कंटेनर -->
+  <!-- Main Container -->
   <main class="max-w-7xl mx-auto px-3 sm:px-4 py-5 flex-grow w-full">
-
-    <!-- लाइव स्टेटस अलर्ट -->
     <div id="noticeBanner" class="hidden mb-4 p-3 rounded-lg text-sm border flex items-center justify-between shadow-sm"></div>
 
-    <!-- ======================================================== -->
-    <!-- 1. टैब: उपस्थिति (ATTENDANCE WITH OVERWRITE LOGIC) -->
-    <!-- ======================================================== -->
+    <!-- 1. ATTENDANCE TAB (OVERWRITE LOGIC) -->
     <section id="section-attendance" class="space-y-4">
-      
-      <!-- फ़िल्टर और एक्शन बार -->
       <div class="bg-white p-4 rounded-xl border border-orange-100 card-shadow flex flex-wrap gap-4 items-center justify-between">
-        
         <div class="flex items-center gap-3">
-          <label class="font-bold text-stone-700 text-sm">शाखा चुनें:</label>
+          <label class="font-bold text-stone-700 text-sm">शाखा:</label>
           <select id="attendanceShakhaSelect" onchange="renderAttendanceList()" class="border border-orange-300 rounded-lg px-3 py-1.5 bg-orange-50 font-semibold text-saffron-900 text-sm focus:ring-2 focus:ring-saffron-500">
-            <!-- Dynamic Shakhas -->
           </select>
         </div>
 
-        <!-- लाइव सर्च बार -->
         <div class="relative flex-1 min-w-[180px] max-w-xs">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-stone-400 text-xs"></i>
           <input type="text" id="studentSearchInput" oninput="renderAttendanceList()" placeholder="नाम या फोन से खोजें..." class="w-full pl-8 pr-3 py-1.5 border border-stone-200 rounded-lg text-xs bg-stone-50 focus:bg-white focus:ring-2 focus:ring-saffron-500">
         </div>
 
-        <!-- लाइव क्लॉक एवं दिनांक -->
         <div class="flex items-center gap-2 text-xs font-semibold text-stone-500">
           <span>दिनांक: <strong id="todayDisplayDate" class="text-stone-800">--</strong></span>
           <span class="text-orange-300">|</span>
           <span>समय: <strong id="clockDisplay" class="text-stone-800">--:--:--</strong></span>
         </div>
 
-        <!-- सिंक और चयन बटन -->
         <div class="flex items-center gap-2 w-full sm:w-auto">
           <button onclick="loadDataFromBackend(true)" title="Google Sheet से ताज़ा डेटा लाएं" class="bg-stone-100 hover:bg-stone-200 text-stone-700 px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1">
             <i class="fa-solid fa-rotate"></i> रिफ्रेश
@@ -137,15 +124,14 @@
         </div>
       </div>
 
-      <!-- स्वयंसेवक सूची टेबल -->
       <div class="bg-white rounded-xl border border-orange-100 card-shadow overflow-hidden">
         <div class="p-4 bg-orange-50/60 border-b border-orange-100 flex flex-wrap justify-between items-center gap-2">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-users text-saffron-600 text-lg"></i>
-            <h2 class="font-bold text-stone-800 text-base">स्वयंसेवक सूची (<span id="shakhaNameTitle">दिव्यजोत</span>)</h2>
+            <h2 class="font-bold text-stone-800 text-base">स्वयंसेवक उपस्थिति सूची (<span id="shakhaNameTitle">--</span>)</h2>
           </div>
           <span id="attendanceCounter" class="text-xs bg-saffron-100 text-saffron-800 font-bold px-3 py-1 rounded-full border border-saffron-300 shadow-sm">
-            उपस्थिति: 0 / 25
+            उपस्थिति: 0 / 0
           </span>
         </div>
 
@@ -161,15 +147,13 @@
               </tr>
             </thead>
             <tbody id="attendanceTbody" class="divide-y divide-stone-100">
-              <!-- Dynamically rendered rows -->
             </tbody>
           </table>
         </div>
 
-        <!-- फुटर सबमिट बार -->
         <div class="p-4 bg-stone-50 border-t flex flex-col sm:flex-row justify-between items-center gap-3">
           <p class="text-xs text-stone-500 italic">
-            <i class="fa-solid fa-shield-halved text-saffron-600 mr-1"></i> ओवरराइट सुरक्षित प्रणाली: दोबारा सबमिट करने पर उसी दिन की पुरानी एंट्रीज अपडेट हो जाएंगी (डुप्लीकेट नहीं बनेगी)।
+            <i class="fa-solid fa-rotate text-saffron-600 mr-1"></i> ओवरराइट सुरक्षित: एक ही दिन की उपस्थिति पुनः सबमिट करने पर पुरानी एंट्री अपडेट हो जाएगी।
           </p>
           <button onclick="submitAttendance()" class="w-full sm:w-auto bg-saffron-600 hover:bg-saffron-700 text-white font-bold px-7 py-2.5 rounded-lg text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-95">
             <i class="fa-solid fa-cloud-arrow-up"></i> उपस्थिति अद्यतित करें (Save / Overwrite)
@@ -178,21 +162,18 @@
       </div>
     </section>
 
-    <!-- ======================================================== -->
-    <!-- 2. टैब: उपस्थिति सांख्यिकी एवं विश्लेषण (ANALYTICS & CHARTS) -->
-    <!-- ======================================================== -->
+    <!-- 2. ANALYTICS TAB (PRESENT STUDENTS COUNT BASED) -->
     <section id="section-analytics" class="hidden space-y-5">
-      
-      <!-- टाइमफ्रेम चयन बार -->
       <div class="bg-white p-4 rounded-xl border border-orange-100 card-shadow flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-lg font-bold text-stone-800 flex items-center gap-2">
-            <i class="fa-solid fa-chart-pie text-saffron-600"></i> जोधपुर नगर - उपस्थिति विश्लेषण
+            <i class="fa-solid fa-chart-pie text-saffron-600"></i> उपस्थिति सांख्यिकी एवं प्रतिवेदन (Analytics)
           </h2>
-          <p class="text-xs text-stone-500">सभी शाखाओं की दैनिक, साप्ताहिक एवं मासिक औसत उपस्थिति</p>
+          <p class="text-xs text-stone-500" id="analyticsSubtitle">
+            वास्तविक उपस्थित स्वयंसेवकों की संख्या पर आधारित रिपोर्ट
+          </p>
         </div>
 
-        <!-- अवधि टॉगल बटन (Today, Week, Month) -->
         <div class="flex items-center bg-stone-100 p-1 rounded-xl border border-stone-200 text-xs font-bold">
           <button onclick="changeAnalyticsTimeframe('today')" id="btn-time-today" class="px-4 py-2 rounded-lg bg-saffron-600 text-white shadow-sm transition">
             आज (Today)
@@ -206,25 +187,25 @@
         </div>
       </div>
 
-      <!-- प्रमुख आंकड़े कार्ड्स (KPI Cards) -->
+      <!-- KPI Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white p-4 rounded-xl border border-orange-100 card-shadow flex items-center gap-3">
           <div class="w-12 h-12 rounded-xl bg-orange-100 text-saffron-700 flex items-center justify-center text-xl">
             <i class="fa-solid fa-building-columns"></i>
           </div>
           <div>
-            <p class="text-xs text-stone-500 font-semibold">सक्रिय शाखाएं</p>
+            <p class="text-xs text-stone-500 font-semibold">निगरानी में शाखाएं</p>
             <p id="kpiTotalShakhas" class="text-xl font-bold text-stone-800">--</p>
           </div>
         </div>
 
         <div class="bg-white p-4 rounded-xl border border-orange-100 card-shadow flex items-center gap-3">
           <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl">
-            <i class="fa-solid fa-users-check"></i>
+            <i class="fa-solid fa-user-check"></i>
           </div>
           <div>
-            <p class="text-xs text-stone-500 font-semibold">कुल दर्ज उपस्थिति</p>
-            <p id="kpiTotalAttendance" class="text-xl font-bold text-emerald-700">--</p>
+            <p class="text-xs text-stone-500 font-semibold" id="kpiLabelTotalPresent">आज कुल उपस्थित</p>
+            <p id="kpiTotalAttendance" class="text-xl font-bold text-emerald-700">0</p>
           </div>
         </div>
 
@@ -233,35 +214,33 @@
             <i class="fa-solid fa-calculator"></i>
           </div>
           <div>
-            <p class="text-xs text-stone-500 font-semibold">औसत उपस्थिति / शाखा</p>
-            <p id="kpiAvgAttendance" class="text-xl font-bold text-amber-800">--</p>
+            <p class="text-xs text-stone-500 font-semibold">दैनिक औसत उपस्थिति</p>
+            <p id="kpiAvgAttendance" class="text-xl font-bold text-amber-800">0</p>
           </div>
         </div>
 
         <div class="bg-white p-4 rounded-xl border border-orange-100 card-shadow flex items-center gap-3">
           <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-xl">
-            <i class="fa-solid fa-trophy"></i>
+            <i class="fa-solid fa-percent"></i>
           </div>
           <div>
-            <p class="text-xs text-stone-500 font-semibold">सर्वश्रेष्ठ शाखा</p>
-            <p id="kpiTopShakha" class="text-base font-bold text-purple-800 truncate">--</p>
+            <p class="text-xs text-stone-500 font-semibold">औसत उपस्थिति दर</p>
+            <p id="kpiTopShakha" class="text-xl font-bold text-purple-800">0%</p>
           </div>
         </div>
       </div>
 
-      <!-- चार्ट्स सेक्शन (Charts Area) -->
+      <!-- Charts Area -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <!-- चार्ट 1: शाखावार तुलना या औसत -->
         <div class="bg-white p-5 rounded-xl border border-orange-100 card-shadow">
           <h3 id="chart1Title" class="text-sm font-bold text-stone-700 mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-chart-column text-saffron-600"></i> शाखावार उपस्थिति तुलना
+            <i class="fa-solid fa-chart-column text-saffron-600"></i> उपस्थित स्वयंसेवकों की संख्या
           </h3>
           <div class="h-64 relative">
             <canvas id="analyticsChart1"></canvas>
           </div>
         </div>
 
-        <!-- चार्ट 2: दिन-वार ट्रेंड या दैनिक उपस्थिति ग्राफ -->
         <div class="bg-white p-5 rounded-xl border border-orange-100 card-shadow">
           <h3 id="chart2Title" class="text-sm font-bold text-stone-700 mb-3 flex items-center gap-2">
             <i class="fa-solid fa-arrow-trend-up text-saffron-600"></i> दैनिक उपस्थिति गतिशीलता (Trend)
@@ -272,11 +251,11 @@
         </div>
       </div>
 
-      <!-- विस्तृत सांख्यिकी तालिका (Detailed Breakdown Table) -->
+      <!-- Analytics Breakdown Table -->
       <div class="bg-white rounded-xl border border-orange-100 card-shadow overflow-hidden">
         <div class="p-4 bg-orange-50/60 border-b border-orange-100 flex justify-between items-center">
           <h3 class="font-bold text-stone-800 text-sm flex items-center gap-2">
-            <i class="fa-solid fa-table-list text-saffron-600"></i> शाखावार उपस्थिति विवरण एवं औसत
+            <i class="fa-solid fa-table-list text-saffron-600"></i> शाखावार उपस्थिति विवरण (वास्तविक उपस्थिति आधार)
           </h3>
           <span class="text-xs text-stone-500 font-semibold" id="tablePeriodLabel">वर्तमान अवधि</span>
         </div>
@@ -285,34 +264,30 @@
             <thead class="bg-stone-50 text-stone-600 text-xs border-b">
               <tr>
                 <th class="p-3">शाखा</th>
-                <th class="p-3 text-center">कुल पंजीकृत</th>
+                <th class="p-3 text-center">कुल नामांकित</th>
                 <th class="p-3 text-center" id="colActiveDays">कार्य दिवस</th>
-                <th class="p-3 text-center" id="colTotalCount">कुल उपस्थिति</th>
+                <th class="p-3 text-center" id="colTotalCount">कुल उपस्थिति दर्ज</th>
                 <th class="p-3 text-center bg-orange-50 font-bold text-saffron-900" id="colAvgCount">दैनिक औसत उपस्थिति</th>
                 <th class="p-3 text-center">उपस्थिति दर (%)</th>
               </tr>
             </thead>
             <tbody id="analyticsTableTbody" class="divide-y divide-stone-100">
-              <!-- Rendered via JS -->
             </tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- ======================================================== -->
-    <!-- 3. टैब: स्वयंसेवक सूची व संपादन (DIRECTORY & EDIT) -->
-    <!-- ======================================================== -->
+    <!-- 3. DIRECTORY TAB (LIST, SEPARATE ADD & EDIT MODALS, DELETE) -->
     <section id="section-directory" class="space-y-4">
       <div class="bg-white p-5 rounded-xl border border-orange-100 card-shadow">
-        
         <div class="flex flex-wrap items-center justify-between pb-4 border-b gap-3">
           <div>
             <h2 class="text-lg font-bold text-stone-800 flex items-center gap-2">
-              <i class="fa-solid fa-address-book text-saffron-600"></i> स्वयंसेवक निर्देशिका (Directory)
+              <i class="fa-solid fa-address-book text-saffron-600"></i> स्वयंसेवक निर्देशिका
             </h2>
             <p class="text-xs text-stone-500">
-              * दायित्व 1, 2, 3, 4 विवरण संपादित कर सकते हैं। अन्य दायित्व केवल देख सकते हैं।
+              * दायित्व 1, 2, 3, 4 विवरण संपादित अथवा हटा सकते हैं। अन्य दायित्व केवल देख सकते हैं।
             </p>
           </div>
           
@@ -323,13 +298,10 @@
           </div>
         </div>
 
-        <!-- फ़िल्टर बार -->
         <div class="mt-4 flex flex-wrap gap-3 items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="text-xs font-bold text-stone-600">शाखा फ़िल्टर:</span>
             <select id="dirShakhaFilter" onchange="renderDirectoryTable()" class="border border-orange-300 rounded-lg px-3 py-1.5 text-xs font-semibold bg-orange-50/50">
-              <option value="ALL">समस्त जोधपुर नगर</option>
-              <!-- Populated by JS -->
             </select>
           </div>
 
@@ -339,7 +311,6 @@
           </div>
         </div>
 
-        <!-- स्वयंसेवक टेबल -->
         <div class="overflow-x-auto mt-4">
           <table class="w-full text-left text-xs sm:text-sm">
             <thead class="bg-stone-50 text-stone-600 font-bold border-b">
@@ -355,16 +326,45 @@
               </tr>
             </thead>
             <tbody id="directoryTbody" class="divide-y divide-stone-100">
-              <!-- Rendered via JS -->
             </tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- ======================================================== -->
-    <!-- 4. टैब: दैनिक गतिविधि (DAILY ROUTINE) -->
-    <!-- ======================================================== -->
+    <!-- 4. SAMAY SARINI TAB (EDITABLE BY AUTHORITY 1, 2) -->
+    <section id="section-samay" class="hidden space-y-4">
+      <div class="bg-white p-6 rounded-xl border border-orange-100 card-shadow">
+        <div class="flex flex-wrap items-center justify-between pb-4 border-b gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-stone-800">समय सारिणी (साप्ताहिक योजना)</h2>
+            <p class="text-xs text-stone-500">
+              * शाखा कार्यवाह (1) एवं मुख्यशिक्षक (2) अपनी शाखा की समय सारिणी संपादित कर सकते हैं।
+            </p>
+          </div>
+          <select id="samayShakhaFilter" onchange="renderSamaySarini()" class="border border-orange-300 rounded-lg px-3 py-1.5 text-xs font-semibold bg-orange-50">
+          </select>
+        </div>
+
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-stone-50 text-stone-600 font-bold border-b">
+              <tr>
+                <th class="p-3 w-28">वार (Day)</th>
+                <th class="p-3">शाखा</th>
+                <th class="p-3">कार्यक्रम (Karyakram)</th>
+                <th class="p-3">प्रभारी कार्यकर्ता</th>
+                <th class="p-3 text-center w-24">क्रिया</th>
+              </tr>
+            </thead>
+            <tbody id="samayTbody" class="divide-y divide-stone-100">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. DAILY ROUTINE TAB -->
     <section id="section-routine" class="hidden space-y-4">
       <div class="bg-white p-6 rounded-xl border border-orange-100 card-shadow">
         <div class="border-b pb-4 mb-4 flex items-center justify-between">
@@ -429,9 +429,7 @@
       </div>
     </section>
 
-    <!-- ======================================================== -->
-    <!-- 5. टैब: गणवेश स्थिति (UNIFORM) -->
-    <!-- ======================================================== -->
+    <!-- 6. UNIFORM TAB -->
     <section id="section-uniform" class="hidden space-y-4">
       <div class="bg-white p-6 rounded-xl border border-orange-100 card-shadow">
         <div class="flex flex-wrap items-center justify-between pb-4 border-b gap-3">
@@ -441,7 +439,6 @@
           </div>
           <div class="flex items-center gap-2">
             <select id="uniformShakhaFilter" onchange="renderUniformTable()" class="border border-orange-300 rounded-lg px-3 py-1.5 text-xs font-semibold bg-orange-50">
-              <!-- Courses -->
             </select>
           </div>
         </div>
@@ -463,49 +460,13 @@
               </tr>
             </thead>
             <tbody id="uniformTbody" class="divide-y divide-stone-100">
-              <!-- Rendered via JS -->
             </tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- ======================================================== -->
-    <!-- 6. टैब: समय सारिणी (SAMAY SARINI) -->
-    <!-- ======================================================== -->
-    <section id="section-samay" class="hidden space-y-4">
-      <div class="bg-white p-6 rounded-xl border border-orange-100 card-shadow">
-        <div class="flex flex-wrap items-center justify-between pb-4 border-b gap-3">
-          <div>
-            <h2 class="text-lg font-bold text-stone-800">समय सारिणी (साप्ताहिक योजना)</h2>
-            <p class="text-xs text-stone-500">प्रत्येक वार का कार्यक्रम एवं प्रभारी कार्यकर्ता का दायित्व</p>
-          </div>
-          <select id="samayShakhaFilter" onchange="renderSamaySarini()" class="border border-orange-300 rounded-lg px-3 py-1.5 text-xs font-semibold bg-orange-50">
-            <!-- Shakhas -->
-          </select>
-        </div>
-
-        <div class="overflow-x-auto mt-4">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-stone-50 text-stone-600 font-bold border-b">
-              <tr>
-                <th class="p-3">वार (Day)</th>
-                <th class="p-3">शाखा</th>
-                <th class="p-3">कार्यक्रम (Karyakram)</th>
-                <th class="p-3">प्रभारी कार्यकर्ता</th>
-              </tr>
-            </thead>
-            <tbody id="samayTbody" class="divide-y divide-stone-100">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ======================================================== -->
-    <!-- 7. टैब: शाखा प्रबंधन (COURSES - AUTHORITY 3, 4) -->
-    <!-- ======================================================== -->
+    <!-- 7. COURSE / SHAKHA MANAGEMENT TAB -->
     <section id="section-courses" class="hidden space-y-4">
       <div class="bg-white p-6 rounded-xl border border-orange-100 card-shadow">
         <div class="flex flex-wrap items-center justify-between pb-4 border-b gap-3">
@@ -518,7 +479,6 @@
           </span>
         </div>
 
-        <!-- शाखा जोड़ने का फॉर्म -->
         <div id="addShakhaContainer" class="my-4 p-4 bg-orange-50/70 rounded-xl border border-orange-200">
           <h3 class="font-bold text-sm text-saffron-900 mb-3 flex items-center gap-2">
             <i class="fa-solid fa-circle-plus"></i> नई शाखा जोड़ें
@@ -543,32 +503,32 @@
               </tr>
             </thead>
             <tbody id="courseTbody" class="divide-y divide-stone-100">
-              <!-- Rendered via JS -->
             </tbody>
           </table>
         </div>
       </div>
     </section>
-
   </main>
 
   <!-- ======================================================== -->
-  <!-- मोडल: स्वयंसेवक संपादन एवं विवरण (STUDENT EDIT MODAL) -->
+  <!-- MODALS -->
   <!-- ======================================================== -->
+
+  <!-- 1. EDIT STUDENT MODAL -->
   <div id="studentEditModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border-t-4 border-saffron-600 my-auto">
       <div class="flex justify-between items-center mb-3">
         <h3 id="editModalHeading" class="font-bold text-lg text-stone-800 flex items-center gap-2">
-          <i class="fa-solid fa-user-pen text-saffron-600"></i> स्वयंसेवक विवरण संपादन
+          <i class="fa-solid fa-user-pen text-saffron-600"></i> स्वयंसेवक विवरण संपादन (Update)
         </h3>
         <button onclick="closeEditModal()" class="text-stone-400 hover:text-stone-600 text-xl font-bold">&times;</button>
       </div>
 
       <div id="editAccessNotice" class="hidden mb-3 p-2 bg-amber-50 text-amber-800 rounded-lg text-xs border border-amber-200">
-        <i class="fa-solid fa-lock mr-1"></i> केवल देखने की अनुमति है (View Only)। केवल दायित्व 1, 2, 3 एवं 4 विवरण बदल सकते हैं।
+        <i class="fa-solid fa-lock mr-1"></i> केवल देखने की अनुमति है (View Only)।
       </div>
 
-      <form id="editStudentForm" onsubmit="event.preventDefault(); submitStudentEdit();" class="space-y-3.5 text-xs sm:text-sm">
+      <form id="editStudentForm" onsubmit="event.preventDefault(); submitStudentEdit();" class="space-y-3 text-xs sm:text-sm">
         <input type="hidden" id="editStudentId">
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -597,7 +557,6 @@
           <div>
             <label class="block font-bold text-stone-700 mb-1">शाखा *</label>
             <select id="editShakha" required class="w-full border rounded-lg p-2">
-              <!-- Courses -->
             </select>
           </div>
           <div>
@@ -618,7 +577,6 @@
           <div>
             <label class="block font-bold text-stone-700 mb-1">दायित्व (Responcibility) *</label>
             <select id="editRole" required class="w-full border rounded-lg p-2">
-              <!-- Authorities -->
             </select>
           </div>
         </div>
@@ -641,31 +599,160 @@
           <textarea id="editAddress" rows="2" class="w-full border rounded-lg p-2"></textarea>
         </div>
 
-        <div class="flex justify-end gap-2 pt-2 border-t">
-          <button type="button" onclick="closeEditModal()" class="px-4 py-2 border rounded-lg text-stone-600 font-bold hover:bg-stone-50">
+        <div class="flex justify-between items-center pt-3 border-t">
+          <button type="button" id="editDeleteBtn" onclick="deleteCurrentStudent()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold px-4 py-2 rounded-lg text-xs border border-rose-300 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-trash"></i> स्वयंसेवक हटाएं (Delete)
+          </button>
+          
+          <div class="flex gap-2">
+            <button type="button" onclick="closeEditModal()" class="px-4 py-2 border rounded-lg text-stone-600 font-bold hover:bg-stone-50">
+              रद्द करें
+            </button>
+            <button type="submit" id="editSaveBtn" class="bg-saffron-600 hover:bg-saffron-700 text-white font-bold px-5 py-2 rounded-lg shadow transition">
+              विवरण अद्यतित करें (Update Details)
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. ADD STUDENT MODAL (CLEAN SEPARATE FORM) -->
+  <div id="studentAddModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border-t-4 border-emerald-600 my-auto">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-bold text-lg text-stone-800 flex items-center gap-2">
+          <i class="fa-solid fa-user-plus text-emerald-600"></i> नया स्वयंसेवक जोड़ें (New Enrollment)
+        </h3>
+        <button onclick="closeAddModal()" class="text-stone-400 hover:text-stone-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <p class="text-xs text-stone-500 mb-3">कृपया सभी विवरण भरें। समान नाम या मोबाइल नंबर वाला स्वयंसेवक दोबारा नहीं जोड़ा जा सकेगा।</p>
+
+      <form id="addStudentForm" onsubmit="event.preventDefault(); submitStudentAdd();" class="space-y-3 text-xs sm:text-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">प्रथम नाम *</label>
+            <input type="text" id="addFirstName" required class="w-full border rounded-lg p-2" placeholder="उदा. सुशांत">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">उपनाम *</label>
+            <input type="text" id="addLastName" required class="w-full border rounded-lg p-2" placeholder="उदा. वांढेकर">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">संक्षिप्त / पुकार का नाम</label>
+            <input type="text" id="addSecondaryName" class="w-full border rounded-lg p-2" placeholder="उदा. सुशांतभाई">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">ईमेल *</label>
+            <input type="email" id="addEmail" required class="w-full border rounded-lg p-2" placeholder="email@gmail.com">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">शाखा *</label>
+            <select id="addShakha" required class="w-full border rounded-lg p-2">
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">आयु *</label>
+            <input type="number" id="addAge" required min="5" max="110" class="w-full border rounded-lg p-2" placeholder="25">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">दूरभाष (Phone) *</label>
+            <input type="tel" id="addPhone" required class="w-full border rounded-lg p-2" placeholder="98XXXXXXXX">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">जन्म तिथि (DOB)</label>
+            <input type="date" id="addDob" class="w-full border rounded-lg p-2">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">दायित्व (Responcibility) *</label>
+            <select id="addRole" required class="w-full border rounded-lg p-2">
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">गटनायक</label>
+            <select id="addGatnayak" class="w-full border rounded-lg p-2">
+              <option value="">कोई नहीं</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">चित्र / Headshot URL</label>
+            <input type="text" id="addHeadshot" class="w-full border rounded-lg p-2">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-700 mb-1">निवास स्थान / पता (Address)</label>
+          <textarea id="addAddress" rows="2" class="w-full border rounded-lg p-2" placeholder="पता..."></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t">
+          <button type="button" onclick="closeAddModal()" class="px-4 py-2 border rounded-lg text-stone-600 font-bold hover:bg-stone-50">
             रद्द करें
           </button>
-          <button type="submit" id="editSaveBtn" class="bg-saffron-600 hover:bg-saffron-700 text-white font-bold px-5 py-2 rounded-lg shadow transition">
-            परिवर्तन सहेजें (Update)
+          <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg shadow transition">
+            नया स्वयंसेवक पंजीकृत करें
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- फ़ूटर एवं टेस्ट ईमेल बटन -->
-  <footer class="bg-stone-900 text-stone-400 text-xs py-4 border-t border-stone-800 mt-auto">
-    <div class="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-3">
-      <p>© राष्ट्रीय स्वयंसेवक संघ, जोधपुर नगर | स्वचालित प्रतिवेदन: प्रतिदिन प्रातः 9:30 AM</p>
-      <div class="flex items-center gap-3">
-        <button onclick="triggerManualMail()" class="bg-stone-800 hover:bg-stone-700 text-amber-300 border border-stone-700 px-3 py-1.5 rounded text-xs transition flex items-center gap-1.5 font-bold">
-          <i class="fa-solid fa-envelope-circle-check"></i> ईमेल रिपोर्ट टेस्ट भेजें (Send Now)
-        </button>
+  <!-- 3. SAMAY SARINI EDIT MODAL -->
+  <div id="samayEditModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border-t-4 border-saffron-600">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-bold text-base text-stone-800 flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-saffron-600"></i> समय सारिणी कार्यक्रम संपादन
+        </h3>
+        <button onclick="closeSamayEditModal()" class="text-stone-400 hover:text-stone-600 text-xl font-bold">&times;</button>
       </div>
-    </div>
-  </footer>
 
-  <!-- कार्यकर्ता लॉगिन / दायित्व स्विच मॉडल -->
+      <form onsubmit="event.preventDefault(); submitSamayEdit();" class="space-y-3 text-sm">
+        <input type="hidden" id="samayEditShakha">
+        <input type="hidden" id="samayEditDay">
+
+        <div>
+          <label class="block text-xs font-bold text-stone-600 mb-1">वार एवं शाखा:</label>
+          <p id="samayEditDisplay" class="font-bold text-saffron-900 bg-orange-50 p-2 rounded-lg border border-orange-200">--</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1">कार्यक्रम (Karyakram) *</label>
+          <input type="text" id="samayEditKaryakram" required class="w-full border rounded-lg p-2 text-sm" placeholder="उदा. बोध कथा, चर्चा, एकात्मता स्तोत्र">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1">प्रभारी कार्यकर्ता (Karyakarta) *</label>
+          <select id="samayEditKaryakarta" required class="w-full border rounded-lg p-2 text-sm bg-stone-50">
+          </select>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t">
+          <button type="button" onclick="closeSamayEditModal()" class="px-3 py-1.5 border rounded-lg text-stone-600 text-xs font-bold hover:bg-stone-50">
+            रद्द करें
+          </button>
+          <button type="submit" class="bg-saffron-600 hover:bg-saffron-700 text-white font-bold px-4 py-1.5 rounded-lg text-xs shadow transition">
+            कार्यक्रम सहेजें
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. USER ROLE SELECTOR MODAL -->
   <div id="loginModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border-t-4 border-saffron-600">
       <div class="flex justify-between items-center mb-3">
@@ -675,22 +762,20 @@
         <button onclick="closeLoginModal()" class="text-stone-400 hover:text-stone-600 text-xl font-bold">&times;</button>
       </div>
       <p class="text-xs text-stone-500 mb-4">
-        उपस्थिति भरने या विवरण संपादित करने हेतु अपना नाम चुनें:
+        उपस्थिति भरने, संपादन करने अथवा प्रतिवेदन देखने हेतु अपना नाम चुनें:
       </p>
 
       <div class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-stone-700 mb-1">कार्यकर्ता का नाम:</label>
           <select id="userSelector" class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-saffron-500 bg-stone-50">
-            <!-- Dynamic Users -->
           </select>
         </div>
 
         <div class="p-3 bg-amber-50 rounded-lg border border-amber-200 text-xs text-amber-900 space-y-1">
-          <p><strong>अधिकार नियम:</strong></p>
-          <p>• <strong>1 (शाखा कार्यवाह), 2 (मुख्यशिक्षक), 6 (गटनायक):</strong> अपनी शाखा की उपस्थिति भर सकते हैं।</p>
-          <p>• <strong>1, 2, 3, 4:</strong> स्वयंसेवक विवरण संपादित कर सकते हैं।</p>
-          <p>• <strong>3, 4:</strong> शाखा जोड़/हटा सकते हैं और सभी शाखाओं का 9:30 AM मेल प्राप्त करते हैं।</p>
+          <p><strong>अधिकार नियम (RBAC Scope):</strong></p>
+          <p>• <strong>3, 4 (नगर कार्यवाह / सह कार्यवाह):</strong> नगर की सभी शाखाओं का डेटा, सांख्यिकी विश्लेषण एवं संपादन देख सकते हैं।</p>
+          <p>• <strong>1 (शाखा कार्यवाह), 2 (मुख्यशिक्षक), 6 (गटनायक):</strong> केवल अपनी ही शाखा का डेटा, उपस्थिति, समय सारिणी एवं सांख्यिकी देख/भर सकते हैं।</p>
         </div>
 
         <button onclick="applyUserSelection()" class="w-full bg-saffron-600 hover:bg-saffron-700 text-white font-bold py-2.5 rounded-lg text-sm shadow transition">
@@ -700,14 +785,26 @@
     </div>
   </div>
 
-  <!-- जावास्क्रिप्ट तर्क -->
+  <!-- Footer -->
+  <footer class="bg-stone-900 text-stone-400 text-xs py-4 border-t border-stone-800 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-3">
+      <p>© राष्ट्रीय स्वयंसेवक संघ, जोधपुर नगर | स्वचालित प्रतिवेदन: प्रतिदिन प्रातः 9:30 AM</p>
+      <div class="flex items-center gap-3">
+        <button onclick="triggerManualMail()" class="bg-stone-800 hover:bg-stone-700 text-amber-300 border border-stone-700 px-3 py-1.5 rounded text-xs transition flex items-center gap-1.5 font-bold">
+          <i class="fa-solid fa-envelope-circle-check"></i> 9:30 AM प्रतिवेदन टेस्ट भेजें
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- App Script Logic -->
   <script>
     // =========================================================================
-    // कन्फिगरेशन: अपनी डिप्लॉय की गई Google Apps Script Web App URL यहाँ डालें
+    // CONFIGURATION: Google Apps Script Web App URL
     // =========================================================================
     const API_URL = "https://script.google.com/macros/s/AKfycbwl7SDh-ZIQlbwnon6fG8ZyYWb0hr5JiHCsGBXX453AihKzhbA1wuM7KPsCqQjo2eTXfA/exec"; 
 
-    // इनबिल्ट 25 स्वयंसेवकों का प्रारंभिक डेटा (दिव्यजोत शाखा)
+    // Initial State (Defaulting to 25 students of दिव्यजोत)
     const INITIAL_STUDENTS = [
       { ID: 1, "First Name": "सुशांत", "Last Name": "वांढेकर", Shakha: "दिव्यजोत", Responcibility: 3, Phone: "9657339396", SecondaryName: "सुशांत", Email: "sushantwandhekar4@gmail.com" },
       { ID: 2, "First Name": "रमेशभाई", "Last Name": "प्रजापती", Shakha: "दिव्यजोत", Responcibility: 7, Phone: "9327554911", SecondaryName: "रमेशभाई", Email: "rameshprajapati9327@gmail.com" },
@@ -736,7 +833,6 @@
       { ID: 25, "First Name": "राधेश", "Last Name": "भोजणी", Shakha: "दिव्यजोत", Responcibility: 0, Phone: "6359612900", SecondaryName: "राधेश", Email: "radheshdeepbhojani@gmail.com" }
     ];
 
-    // ग्लोबल ऐप स्टेट
     let appData = {
       todayDate: "",
       students: [...INITIAL_STUDENTS],
@@ -756,12 +852,20 @@
       ],
       routines: [],
       uniforms: [],
-      samaySarini: [],
+      samaySarini: [
+        { Shakha: "दिव्यजोत", Day: "सोमवार", Karyakram: "एकात्मता स्तोत्र, एकात्मता मंत्र", Karyakarta: 12 },
+        { Shakha: "दिव्यजोत", Day: "मंगळवार", Karyakram: "बोध कथा", Karyakarta: 2 },
+        { Shakha: "दिव्यजोत", Day: "बुधवार", Karyakram: "चर्चा", Karyakarta: 4 },
+        { Shakha: "दिव्यजोत", Day: "गुरुवार", Karyakram: "सेवा दिन", Karyakarta: 11 },
+        { Shakha: "दिव्यजोत", Day: "शुक्रवार", Karyakram: "बोध कथा", Karyakarta: 15 },
+        { Shakha: "दिव्यजोत", Day: "शनिवार", Karyakram: "प्रेरक प्रसंग, दीर्घ कथा", Karyakarta: 1 },
+        { Shakha: "दिव्यजोत", Day: "रविवार", Karyakram: "समचार समीक्षा", Karyakarta: 8 }
+      ],
       todayAttendance: [],
       attendanceLogs: []
     };
 
-    // डिफ़ॉल्ट सक्रिय यूज़र (ID: 6 निखिलभाई - मुख्यशिक्षक Role 2)
+    // Default logged-in user: ID 6, Nikhil Rajoria, Mukhya Shikshak (Role 2)
     let currentUser = {
       id: 6,
       name: "निखिल राजोरिया",
@@ -775,7 +879,6 @@
     let chart1Instance = null;
     let chart2Instance = null;
 
-    // लाइव घड़ी
     setInterval(() => {
       const now = new Date();
       document.getElementById('clockDisplay').textContent = now.toLocaleTimeString('hi-IN');
@@ -790,7 +893,7 @@
       loadDataFromBackend(false);
     });
 
-    // बैकएंड से लाइव डेटा फेच करना
+    // Dynamic Google Sheet Sync
     async function loadDataFromBackend(isManual = false) {
       if (isManual) showNotice("Google Sheet से ताज़ा डेटा लोड हो रहा है...", "info");
       
@@ -812,8 +915,12 @@
           if (isManual) showNotice(`सफलतापूर्वक ${appData.students.length} स्वयंसेवकों का डेटा लोड हुआ!`, "success");
         }
       } catch (err) {
-        console.warn("लाइव सिंक त्रुटि, इनबिल्ट 25 डेटा सक्रिय है:", err);
+        console.warn("लाइव सिंक त्रुटि, स्थानीय डेटा सक्रिय है:", err);
       }
+    }
+
+    function isNagarAuthority() {
+      return [3, 4].includes(currentUser.authority);
     }
 
     function setupUI() {
@@ -821,8 +928,8 @@
       populateDropdowns();
       renderAttendanceList();
       renderDirectoryTable();
-      renderUniformTable();
       renderSamaySarini();
+      renderUniformTable();
       renderCourseTable();
       renderAnalyticsDashboard();
     }
@@ -838,67 +945,74 @@
       return found ? found.Name : `दायित्व ${roleId}`;
     }
 
+    // Role-based dropdown scoping
     function populateDropdowns() {
-      const shakhaSelects = ['attendanceShakhaSelect', 'uniformShakhaFilter', 'samayShakhaFilter', 'editShakha'];
+      const isNagar = isNagarAuthority();
+      const visibleCourses = isNagar 
+        ? appData.courses 
+        : appData.courses.filter(c => c.Shakha.trim() === currentUser.shakha.trim());
+
+      const shakhaSelects = ['attendanceShakhaSelect', 'uniformShakhaFilter', 'samayShakhaFilter', 'editShakha', 'addShakha'];
       shakhaSelects.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
         const currentVal = el.value;
         el.innerHTML = "";
-        appData.courses.forEach(c => {
+        visibleCourses.forEach(c => {
           const opt = document.createElement('option');
           opt.value = c.Shakha.trim();
           opt.textContent = c.Shakha.trim();
           el.appendChild(opt);
         });
-        if (currentVal) el.value = currentVal;
+        if (currentVal && visibleCourses.some(c => c.Shakha.trim() === currentVal)) {
+          el.value = currentVal;
+        } else if (currentUser.shakha && visibleCourses.some(c => c.Shakha.trim() === currentUser.shakha.trim())) {
+          el.value = currentUser.shakha.trim();
+        }
       });
 
-      // निर्देशिका शाखा फ़िल्टर
+      // Directory filter dropdown
       const dirFilterEl = document.getElementById('dirShakhaFilter');
       if (dirFilterEl) {
-        const prev = dirFilterEl.value;
-        dirFilterEl.innerHTML = '<option value="ALL">समस्त जोधपुर नगर</option>';
-        appData.courses.forEach(c => {
+        dirFilterEl.innerHTML = isNagar ? '<option value="ALL">समस्त जोधपुर नगर</option>' : '';
+        visibleCourses.forEach(c => {
           const opt = document.createElement('option');
           opt.value = c.Shakha.trim();
           opt.textContent = c.Shakha.trim();
           dirFilterEl.appendChild(opt);
         });
-        if (prev) dirFilterEl.value = prev;
+        if (!isNagar && currentUser.shakha) {
+          dirFilterEl.value = currentUser.shakha.trim();
+        }
       }
 
-      if (!document.getElementById('attendanceShakhaSelect').value && currentUser.shakha) {
-        document.getElementById('attendanceShakhaSelect').value = currentUser.shakha;
-        document.getElementById('uniformShakhaFilter').value = currentUser.shakha;
-        document.getElementById('samayShakhaFilter').value = currentUser.shakha;
-      }
-
-      // रोल ड्रॉपडाउन
-      const editRoleEl = document.getElementById('editRole');
-      if (editRoleEl) {
-        editRoleEl.innerHTML = "";
+      // Role dropdowns
+      ['editRole', 'addRole'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = "";
         appData.authorities.forEach(a => {
           const opt = document.createElement('option');
           opt.value = a.ID;
           opt.textContent = `${a.Name} (ID: ${a.ID})`;
-          editRoleEl.appendChild(opt);
+          el.appendChild(opt);
         });
-      }
+      });
 
-      // गटनायक ड्रॉपडाउन
-      const gatEl = document.getElementById('editGatnayak');
-      if (gatEl) {
-        gatEl.innerHTML = '<option value="">कोई नहीं</option>';
+      // Gatnayak dropdowns
+      ['editGatnayak', 'addGatnayak'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = '<option value="">कोई नहीं</option>';
         appData.students.filter(s => parseInt(s.Responcibility, 10) === 6).forEach(g => {
           const opt = document.createElement('option');
           opt.value = g.ID;
           opt.textContent = `${g.SecondaryName || g['First Name']} (${g.Shakha})`;
-          gatEl.appendChild(opt);
+          el.appendChild(opt);
         });
-      }
+      });
 
-      // यूज़र चयन मॉडल
+      // User switch modal
       const uEl = document.getElementById('userSelector');
       uEl.innerHTML = "";
       appData.students.forEach(s => {
@@ -912,10 +1026,10 @@
     }
 
     // ==========================================
-    // 1. उपस्थिति सूची एवं ओवरराइट लॉजिक
+    // 1. ATTENDANCE & OVERWRITE
     // ==========================================
     function renderAttendanceList() {
-      const selectedShakha = document.getElementById('attendanceShakhaSelect').value || "दिव्यजोत";
+      const selectedShakha = document.getElementById('attendanceShakhaSelect').value || currentUser.shakha || "दिव्यजोत";
       document.getElementById('shakhaNameTitle').textContent = selectedShakha;
 
       const searchTerm = (document.getElementById('studentSearchInput').value || "").trim().toLowerCase();
@@ -992,7 +1106,6 @@
       if (e.target.classList.contains('att-checkbox')) updateCounter();
     });
 
-    // उपस्थिति ओवरराइट सबमिशन
     async function submitAttendance() {
       if (![1, 2, 6, 3, 4].includes(currentUser.authority)) {
         alert("अनधिकृत: केवल शाखा कार्यवाह (1), मुख्यशिक्षक (2) या गटनायक (6) ही उपस्थिति भर सकते हैं।");
@@ -1000,6 +1113,11 @@
       }
 
       const shakha = document.getElementById('attendanceShakhaSelect').value;
+      if (!isNagarAuthority() && shakha !== currentUser.shakha) {
+        alert("आप केवल अपनी ही शाखा की उपस्थिति भर सकते हैं।");
+        return;
+      }
+
       const checkedBoxes = document.querySelectorAll('.att-checkbox:checked');
       const records = [];
 
@@ -1042,10 +1160,246 @@
     }
 
     // ==========================================
-    // 2. स्वयंसेवक संपादन एवं निर्देशिका (STUDENT EDIT)
+    // 2. PRESENT STUDENT COUNT BASED ANALYTICS
+    // ==========================================
+    function changeAnalyticsTimeframe(tf) {
+      currentAnalyticsTimeframe = tf;
+      ['today', 'week', 'month'].forEach(t => {
+        const btn = document.getElementById(`btn-time-${t}`);
+        if (t === tf) {
+          btn.className = "px-4 py-2 rounded-lg bg-saffron-600 text-white shadow-sm transition";
+        } else {
+          btn.className = "px-4 py-2 rounded-lg text-stone-600 hover:text-stone-900 transition";
+        }
+      });
+      renderAnalyticsDashboard();
+    }
+
+    function renderAnalyticsDashboard() {
+      const isNagar = isNagarAuthority();
+      const visibleCourses = isNagar 
+        ? appData.courses 
+        : appData.courses.filter(c => c.Shakha.trim() === currentUser.shakha.trim());
+
+      const shakhas = visibleCourses.map(c => c.Shakha.trim());
+
+      document.getElementById('analyticsSubtitle').textContent = isNagar
+        ? "समस्त जोधपुर नगर की शाखाओं की उपस्थिति रिपोर्ट"
+        : `केवल ${currentUser.shakha} शाखा की उपस्थिति रिपोर्ट`;
+
+      const now = new Date();
+      let startDate = new Date();
+      if (currentAnalyticsTimeframe === 'today') {
+        startDate.setHours(0,0,0,0);
+        document.getElementById('tablePeriodLabel').textContent = "आज: " + now.toLocaleDateString('hi-IN');
+        document.getElementById('colActiveDays').textContent = "स्थिति";
+        document.getElementById('colTotalCount').textContent = "आज उपस्थित संख्या";
+        document.getElementById('colAvgCount').textContent = "आज की उपस्थिति";
+        document.getElementById('kpiLabelTotalPresent').textContent = "आज कुल उपस्थित स्वयंसेवक";
+      } else if (currentAnalyticsTimeframe === 'week') {
+        startDate.setDate(now.getDate() - 7);
+        startDate.setHours(0,0,0,0);
+        document.getElementById('tablePeriodLabel').textContent = "विगत 7 दिवस";
+        document.getElementById('colActiveDays').textContent = "शाखा कार्य दिवस";
+        document.getElementById('colTotalCount').textContent = "कुल उपस्थिति योग";
+        document.getElementById('colAvgCount').textContent = "दैनिक औसत उपस्थिति";
+        document.getElementById('kpiLabelTotalPresent').textContent = "सप्ताह में कुल उपस्थिति";
+      } else {
+        startDate.setDate(now.getDate() - 30);
+        startDate.setHours(0,0,0,0);
+        document.getElementById('tablePeriodLabel').textContent = "विगत 30 दिवस";
+        document.getElementById('colActiveDays').textContent = "शाखा कार्य दिवस";
+        document.getElementById('colTotalCount').textContent = "कुल उपस्थिति योग";
+        document.getElementById('colAvgCount').textContent = "दैनिक औसत उपस्थिति";
+        document.getElementById('kpiLabelTotalPresent').textContent = "माह में कुल उपस्थिति";
+      }
+
+      const stats = {};
+      shakhas.forEach(s => {
+        const enrolled = appData.students.filter(st => (st.Shakha || "").trim() === s).length;
+        stats[s] = {
+          shakha: s,
+          enrolled: enrolled,
+          totalPresent: 0,
+          uniqueDays: new Set(),
+          averageDaily: 0,
+          attendanceRate: 0
+        };
+      });
+
+      const logs = appData.attendanceLogs || [];
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      logs.forEach(log => {
+        if (!log.Date) return;
+        const logDate = new Date(log.Date);
+        if (isNaN(logDate.getTime())) return;
+
+        const dayKey = logDate.toISOString().split('T')[0];
+        const sName = (log.Shakha || "").trim();
+
+        if (stats[sName]) {
+          if (currentAnalyticsTimeframe === 'today') {
+            if (dayKey === todayStr) {
+              stats[sName].totalPresent++;
+              stats[sName].uniqueDays.add(dayKey);
+            }
+          } else if (logDate >= startDate && logDate <= now) {
+            stats[sName].totalPresent++;
+            stats[sName].uniqueDays.add(dayKey);
+          }
+        }
+      });
+
+      let totalPresentAccum = 0;
+      let totalEnrolledSum = 0;
+
+      Object.values(stats).forEach(st => {
+        totalPresentAccum += st.totalPresent;
+        totalEnrolledSum += st.enrolled;
+
+        if (currentAnalyticsTimeframe === 'today') {
+          st.averageDaily = st.totalPresent;
+          st.attendanceRate = st.enrolled > 0 ? ((st.totalPresent / st.enrolled) * 100).toFixed(1) : 0;
+        } else {
+          const days = st.uniqueDays.size > 0 ? st.uniqueDays.size : 1;
+          st.averageDaily = (st.totalPresent / days).toFixed(1);
+          st.attendanceRate = st.enrolled > 0 ? ((parseFloat(st.averageDaily) / st.enrolled) * 100).toFixed(1) : 0;
+        }
+      });
+
+      document.getElementById('kpiTotalShakhas').textContent = shakhas.length;
+      document.getElementById('kpiTotalAttendance').textContent = totalPresentAccum;
+      
+      const overallAvg = shakhas.length > 0 ? (totalPresentAccum / (currentAnalyticsTimeframe === 'today' ? 1 : Math.max(1, shakhas.length))).toFixed(1) : 0;
+      document.getElementById('kpiAvgAttendance').textContent = overallAvg;
+
+      const overallRate = totalEnrolledSum > 0 ? ((totalPresentAccum / (totalEnrolledSum * (currentAnalyticsTimeframe === 'today' ? 1 : 7))) * 100).toFixed(1) : 0;
+      document.getElementById('kpiTopShakha').textContent = overallRate + "%";
+
+      const tbody = document.getElementById('analyticsTableTbody');
+      tbody.innerHTML = "";
+      Object.values(stats).forEach(st => {
+        const daysDisplay = currentAnalyticsTimeframe === 'today'
+          ? (st.totalPresent > 0 ? "सक्रिय" : "शून्य")
+          : `${st.uniqueDays.size} दिवस`;
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-orange-50/30";
+        tr.innerHTML = `
+          <td class="p-3 font-bold text-stone-800">${st.shakha}</td>
+          <td class="p-3 text-center text-stone-600">${st.enrolled}</td>
+          <td class="p-3 text-center text-stone-600">${daysDisplay}</td>
+          <td class="p-3 text-center font-bold text-emerald-700">${st.totalPresent}</td>
+          <td class="p-3 text-center bg-orange-50 font-bold text-saffron-800">
+            <span class="bg-saffron-100 px-3 py-1 rounded-full border border-saffron-200">
+              ${st.averageDaily}
+            </span>
+          </td>
+          <td class="p-3 text-center font-bold text-stone-700">${st.attendanceRate}%</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      renderAnalyticsCharts(stats);
+    }
+
+    function renderAnalyticsCharts(stats) {
+      const shakhaNames = Object.keys(stats);
+      const presentData = shakhaNames.map(s => stats[s].averageDaily);
+      const enrolledData = shakhaNames.map(s => stats[s].enrolled);
+
+      const ctx1 = document.getElementById('analyticsChart1').getContext('2d');
+      if (chart1Instance) chart1Instance.destroy();
+
+      document.getElementById('chart1Title').innerHTML = currentAnalyticsTimeframe === 'today'
+        ? '<i class="fa-solid fa-chart-column text-saffron-600"></i> आज उपस्थित संख्या (वास्तविक उपस्थिति)'
+        : `<i class="fa-solid fa-chart-column text-saffron-600"></i> ${currentAnalyticsTimeframe === 'week' ? 'साप्ताहिक' : 'मासिक'} दैनिक औसत उपस्थिति`;
+
+      chart1Instance = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: shakhaNames,
+          datasets: [
+            {
+              label: 'उपस्थित संख्या (Present)',
+              data: presentData,
+              backgroundColor: '#ea580c',
+              borderRadius: 6
+            },
+            {
+              label: 'कुल नामांकित (Enrolled)',
+              data: enrolledData,
+              backgroundColor: '#fed7aa',
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top', labels: { font: { family: 'Mukta' } } } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      const ctx2 = document.getElementById('analyticsChart2').getContext('2d');
+      if (chart2Instance) chart2Instance.destroy();
+
+      const daysCount = currentAnalyticsTimeframe === 'today' ? 1 : (currentAnalyticsTimeframe === 'week' ? 7 : 14);
+      const dayLabels = [];
+      const trendValues = [];
+      const allowedShakhaSet = new Set(shakhaNames);
+
+      for (let i = daysCount - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dayStr = d.toISOString().split('T')[0];
+        dayLabels.push(d.toLocaleDateString('hi-IN', { weekday: 'short', day: 'numeric' }));
+
+        const count = (appData.attendanceLogs || []).filter(l => {
+          if (!l.Date || !allowedShakhaSet.has((l.Shakha || "").trim())) return false;
+          const lDateStr = new Date(l.Date).toISOString().split('T')[0];
+          return lDateStr === dayStr;
+        }).length;
+
+        trendValues.push(count);
+      }
+
+      chart2Instance = new Chart(ctx2, {
+        type: 'line',
+        data: {
+          labels: dayLabels,
+          datasets: [{
+            label: 'दैनिक उपस्थिति संख्या',
+            data: trendValues,
+            borderColor: '#c2410c',
+            backgroundColor: 'rgba(234, 88, 12, 0.12)',
+            fill: true,
+            tension: 0.35,
+            pointBackgroundColor: '#ea580c',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top', labels: { font: { family: 'Mukta' } } } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    // ==========================================
+    // 3. DIRECTORY, EDIT, DELETE & ADD (DUPLICATE PROTECTED)
     // ==========================================
     function renderDirectoryTable() {
-      const shakhaFilter = document.getElementById('dirShakhaFilter').value;
+      const isNagar = isNagarAuthority();
+      let shakhaFilter = document.getElementById('dirShakhaFilter').value;
+      if (!isNagar) {
+        shakhaFilter = currentUser.shakha;
+      }
+
       const search = (document.getElementById('dirSearchInput').value || "").trim().toLowerCase();
       const tbody = document.getElementById('directoryTbody');
       tbody.innerHTML = "";
@@ -1066,9 +1420,11 @@
         });
       }
 
-      const canEdit = [1, 2, 3, 4].includes(currentUser.authority);
+      const canEditGlobal = [1, 2, 3, 4].includes(currentUser.authority);
 
       list.forEach(st => {
+        const canEditThis = canEditGlobal && (isNagar || String(st.Shakha).trim() === currentUser.shakha);
+
         const tr = document.createElement('tr');
         tr.className = "hover:bg-orange-50/40";
         tr.innerHTML = `
@@ -1081,10 +1437,10 @@
           <td class="p-2.5 hidden md:table-cell text-xs text-stone-500">${st.Email || "-"}</td>
           <td class="p-2.5 text-center">
             <button onclick="openEditModal(${st.ID})" class="px-2.5 py-1 rounded text-xs font-bold transition flex items-center justify-center gap-1 mx-auto ${
-              canEdit ? 'bg-saffron-100 text-saffron-800 hover:bg-saffron-200' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+              canEditThis ? 'bg-saffron-100 text-saffron-800 hover:bg-saffron-200' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
             }">
-              <i class="${canEdit ? 'fa-solid fa-pen-to-square' : 'fa-solid fa-eye'}"></i>
-              <span>${canEdit ? 'संपादित करें' : 'देखें'}</span>
+              <i class="${canEditThis ? 'fa-solid fa-pen-to-square' : 'fa-solid fa-eye'}"></i>
+              <span>${canEditThis ? 'संपादित करें' : 'देखें'}</span>
             </button>
           </td>
         `;
@@ -1092,11 +1448,13 @@
       });
     }
 
+    // Edit Modal Logic (Strictly in-place update)
     function openEditModal(studentId) {
       const student = appData.students.find(s => parseInt(s.ID, 10) === parseInt(studentId, 10));
       if (!student) return;
 
-      const canEdit = [1, 2, 3, 4].includes(currentUser.authority);
+      const isNagar = isNagarAuthority();
+      const canEdit = [1, 2, 3, 4].includes(currentUser.authority) && (isNagar || String(student.Shakha).trim() === currentUser.shakha);
 
       document.getElementById('editStudentId').value = student.ID;
       document.getElementById('editFirstName').value = student['First Name'] || "";
@@ -1112,17 +1470,12 @@
       document.getElementById('editHeadshot').value = student.Headshot || "";
       document.getElementById('editAddress').value = student.Address || "";
 
-      // अधिकार अनुसार इनपुट सक्षम/अक्षम
       const formElements = document.querySelectorAll('#editStudentForm input, #editStudentForm select, #editStudentForm textarea');
-      formElements.forEach(el => {
-        el.disabled = !canEdit;
-      });
+      formElements.forEach(el => el.disabled = !canEdit);
 
       document.getElementById('editSaveBtn').style.display = canEdit ? 'block' : 'none';
+      document.getElementById('editDeleteBtn').style.display = canEdit ? 'block' : 'none';
       document.getElementById('editAccessNotice').classList.toggle('hidden', canEdit);
-      document.getElementById('editModalHeading').innerHTML = canEdit 
-        ? '<i class="fa-solid fa-user-pen text-saffron-600"></i> स्वयंसेवक विवरण संपादन'
-        : '<i class="fa-solid fa-id-card text-saffron-600"></i> स्वयंसेवक विवरण (केवल पठन)';
 
       document.getElementById('studentEditModal').classList.remove('hidden');
     }
@@ -1134,21 +1487,18 @@
     function formatDateForInput(dateVal) {
       try {
         const d = new Date(dateVal);
-        if (!isNaN(d.getTime())) {
-          return d.toISOString().split('T')[0];
-        }
+        if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
       } catch(e) {}
       return "";
     }
 
+    // Submit Edit
     async function submitStudentEdit() {
-      if (![1, 2, 3, 4].includes(currentUser.authority)) {
-        alert("अनुमति अस्वीकृत: केवल दायित्व 1, 2, 3 और 4 ही स्वयंसेवक विवरण बदल सकते हैं।");
-        return;
-      }
+      const studentId = document.getElementById('editStudentId').value;
+      if (!studentId) return;
 
       const studentData = {
-        id: document.getElementById('editStudentId').value,
+        id: studentId,
         firstName: document.getElementById('editFirstName').value.trim(),
         lastName: document.getElementById('editLastName').value.trim(),
         secondaryName: document.getElementById('editSecondaryName').value.trim(),
@@ -1163,7 +1513,7 @@
         address: document.getElementById('editAddress').value.trim()
       };
 
-      showNotice("स्वयंसेवक का विवरण Google Sheet में अद्यतित किया जा रहा है...", "info");
+      showNotice("स्वयंसेवक विवरण अद्यतित किया जा रहा है...", "info");
 
       try {
         const res = await fetch(API_URL, {
@@ -1177,296 +1527,225 @@
         });
         const resp = await res.json();
         if (resp.success) {
-          showNotice("विवरण सफलतापूर्वक सुरक्षित हुआ!", "success");
+          showNotice(resp.message || "विवरण सफलतापूर्वक अद्यतित हुआ!", "success");
           closeEditModal();
           loadDataFromBackend(true);
         } else {
           showNotice("त्रुटि: " + resp.error, "error");
         }
       } catch (err) {
-        showNotice("अनुरोध विफल हुआ: " + err.message, "error");
+        showNotice("अनुरोध विफल: " + err.message, "error");
       }
     }
 
-    function openEnrollNewModal() {
-      // यदि नया स्वयंसेवक जोड़ना है तो मोडल को खाली फॉर्म के रूप में खोलें
-      document.getElementById('editStudentId').value = "";
-      document.getElementById('editStudentForm').reset();
-      
-      const formElements = document.querySelectorAll('#editStudentForm input, #editStudentForm select, #editStudentForm textarea');
-      formElements.forEach(el => el.disabled = false);
-      
-      document.getElementById('editSaveBtn').style.display = 'block';
-      document.getElementById('editSaveBtn').textContent = 'नया स्वयंसेवक जोड़ें';
-      document.getElementById('editAccessNotice').classList.add('hidden');
-      document.getElementById('editModalHeading').innerHTML = '<i class="fa-solid fa-user-plus text-saffron-600"></i> नया स्वयंसेवक प्रवेश';
-      
-      // Override submit to enroll
-      document.getElementById('editStudentForm').onsubmit = async function(e) {
-        e.preventDefault();
-        const data = {
-          firstName: document.getElementById('editFirstName').value.trim(),
-          lastName: document.getElementById('editLastName').value.trim(),
-          secondaryName: document.getElementById('editSecondaryName').value.trim(),
-          email: document.getElementById('editEmail').value.trim(),
-          shakha: document.getElementById('editShakha').value,
-          age: document.getElementById('editAge').value,
-          phone: document.getElementById('editPhone').value.trim(),
-          dob: document.getElementById('editDob').value,
-          responsibility: document.getElementById('editRole').value,
-          gatnayak: document.getElementById('editGatnayak').value,
-          headshot: document.getElementById('editHeadshot').value.trim(),
-          address: document.getElementById('editAddress').value.trim()
-        };
+    // Delete Student
+    async function deleteCurrentStudent() {
+      const studentId = document.getElementById('editStudentId').value;
+      const sName = document.getElementById('editFirstName').value + " " + document.getElementById('editLastName').value;
+      if (!studentId) return;
 
+      if (!confirm(`क्या आप सचमुच स्वयंसेवक "${sName}" (ID: ${studentId}) को हटाना चाहते हैं?`)) return;
+
+      showNotice("स्वयंसेवक हटाया जा रहा है...", "info");
+
+      try {
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
-            action: "enrollStudent",
-            studentData: data,
+            action: "deleteStudent",
+            studentId: studentId,
             authorId: currentUser.id
           })
         });
         const resp = await res.json();
         if (resp.success) {
-          showNotice("नया स्वयंसेवक पंजीकृत हुआ!", "success");
+          showNotice(resp.message || "स्वयंसेवक हटा दिया गया!", "success");
           closeEditModal();
           loadDataFromBackend(true);
         } else {
           showNotice("त्रुटि: " + resp.error, "error");
         }
-      };
-
-      document.getElementById('studentEditModal').classList.remove('hidden');
+      } catch (err) {
+        showNotice("अनुरोध विफल: " + err.message, "error");
+      }
     }
 
-    // ==========================================
-    // 3. उपस्थिति सांख्यिकी एवं चार्ट्स (ANALYTICS)
-    // ==========================================
-    function changeAnalyticsTimeframe(tf) {
-      currentAnalyticsTimeframe = tf;
-      ['today', 'week', 'month'].forEach(t => {
-        const btn = document.getElementById(`btn-time-${t}`);
-        if (t === tf) {
-          btn.className = "px-4 py-2 rounded-lg bg-saffron-600 text-white shadow-sm transition";
-        } else {
-          btn.className = "px-4 py-2 rounded-lg text-stone-600 hover:text-stone-900 transition";
-        }
+    // Add New Student Modal & Submit (Duplicate Validation)
+    function openEnrollNewModal() {
+      if (![1, 2, 6, 3, 4].includes(currentUser.authority)) {
+        alert("नया स्वयंसेवक जोड़ने की अनुमति नहीं है।");
+        return;
+      }
+      document.getElementById('addStudentForm').reset();
+      if (!isNagarAuthority() && currentUser.shakha) {
+        document.getElementById('addShakha').value = currentUser.shakha;
+      }
+      document.getElementById('studentAddModal').classList.remove('hidden');
+    }
+
+    function closeAddModal() {
+      document.getElementById('studentAddModal').classList.add('hidden');
+    }
+
+    async function submitStudentAdd() {
+      const firstName = document.getElementById('addFirstName').value.trim();
+      const lastName = document.getElementById('addLastName').value.trim();
+      const phone = document.getElementById('addPhone').value.trim();
+      const cleanPhone = phone.replace(/\D/g, "");
+      const fullName = (firstName + " " + lastName).toLowerCase();
+
+      // Frontend duplicate check
+      const duplicate = appData.students.find(s => {
+        const sPhone = String(s.Phone || "").replace(/\D/g, "");
+        const sName = (String(s['First Name'] || "") + " " + String(s['Last Name'] || "")).trim().toLowerCase();
+        return (cleanPhone.length >= 10 && sPhone.endsWith(cleanPhone.slice(-10))) || (sName === fullName);
       });
-      renderAnalyticsDashboard();
-    }
 
-    function renderAnalyticsDashboard() {
-      const shakhas = appData.courses.map(c => c.Shakha.trim());
-      const now = new Date();
-
-      // फ़िल्टर अवधि सीमा तय करें
-      let startDate = new Date();
-      if (currentAnalyticsTimeframe === 'today') {
-        startDate.setHours(0,0,0,0);
-        document.getElementById('tablePeriodLabel').textContent = "आज का दिनांक: " + now.toLocaleDateString('hi-IN');
-        document.getElementById('colActiveDays').textContent = "स्थिति";
-        document.getElementById('colTotalCount').textContent = "आज उपस्थित";
-        document.getElementById('colAvgCount').textContent = "उपस्थिति संख्या";
-      } else if (currentAnalyticsTimeframe === 'week') {
-        startDate.setDate(now.getDate() - 7);
-        startDate.setHours(0,0,0,0);
-        document.getElementById('tablePeriodLabel').textContent = "विगत 7 दिवस (साप्ताहिक)";
-        document.getElementById('colActiveDays').textContent = "शाखा कार्य दिवस";
-        document.getElementById('colTotalCount').textContent = "कुल उपस्थिति";
-        document.getElementById('colAvgCount').textContent = "दैनिक औसत उपस्थिति";
-      } else {
-        startDate.setDate(now.getDate() - 30);
-        startDate.setHours(0,0,0,0);
-        document.getElementById('tablePeriodLabel').textContent = "विगत 30 दिवस (मासिक)";
-        document.getElementById('colActiveDays').textContent = "शाखा कार्य दिवस";
-        document.getElementById('colTotalCount').textContent = "कुल उपस्थिति";
-        document.getElementById('colAvgCount').textContent = "दैनिक औसत उपस्थिति";
+      if (duplicate) {
+        alert(`त्रुटि: इस नाम (${firstName} ${lastName}) या मोबाइल नंबर (${phone}) का स्वयंसेवक पहले से पंजीकृत है! (ID: ${duplicate.ID})`);
+        return;
       }
 
-      // डेटा गणना
-      const stats = {};
-      shakhas.forEach(s => {
-        const enrolled = appData.students.filter(st => (st.Shakha || "").trim() === s).length;
-        stats[s] = {
-          shakha: s,
-          enrolled: enrolled,
-          totalPresent: 0,
-          uniqueDays: new Set(),
-          averageDaily: 0,
-          attendanceRate: 0
-        };
-      });
+      const studentData = {
+        firstName: firstName,
+        lastName: lastName,
+        secondaryName: document.getElementById('addSecondaryName').value.trim(),
+        email: document.getElementById('addEmail').value.trim(),
+        shakha: document.getElementById('addShakha').value,
+        age: document.getElementById('addAge').value,
+        phone: phone,
+        dob: document.getElementById('addDob').value,
+        responsibility: document.getElementById('addRole').value,
+        gatnayak: document.getElementById('addGatnayak').value,
+        headshot: document.getElementById('addHeadshot').value.trim(),
+        address: document.getElementById('addAddress').value.trim()
+      };
 
-      // Attendance Logs विश्लेषण
-      const logs = appData.attendanceLogs || [];
-      logs.forEach(log => {
-        if (!log.Date) return;
-        const logDate = new Date(log.Date);
-        if (isNaN(logDate.getTime())) return;
+      showNotice("नया स्वयंसेवक पंजीकृत हो रहा है...", "info");
 
-        if (logDate >= startDate && logDate <= now) {
-          const sName = (log.Shakha || "").trim();
-          if (stats[sName]) {
-            stats[sName].totalPresent++;
-            const dayKey = logDate.toISOString().split('T')[0];
-            stats[sName].uniqueDays.add(dayKey);
-          }
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "enrollStudent",
+            studentData: studentData,
+            authorId: currentUser.id
+          })
+        });
+        const resp = await res.json();
+        if (resp.success) {
+          showNotice(resp.message || "नया स्वयंसेवक सफलतापूर्वक पंजीकृत हुआ!", "success");
+          closeAddModal();
+          loadDataFromBackend(true);
+        } else {
+          showNotice("त्रुटि: " + resp.error, "error");
         }
-      });
+      } catch (err) {
+        showNotice("अनुरोध विफल: " + err.message, "error");
+      }
+    }
 
-      let nagarTotalPresent = 0;
-      let highestAvg = -1;
-      let topShakhaName = "--";
+    // ==========================================
+    // 4. SAMAY SARINI (EDITABLE BY AUTH 1 & 2)
+    // ==========================================
+    function renderSamaySarini() {
+      const isNagar = isNagarAuthority();
+      let shakha = document.getElementById('samayShakhaFilter').value;
+      if (!isNagar) shakha = currentUser.shakha;
 
-      Object.values(stats).forEach(st => {
-        nagarTotalPresent += st.totalPresent;
-        const days = st.uniqueDays.size || (currentAnalyticsTimeframe === 'today' ? 1 : 1);
-        st.averageDaily = (st.totalPresent / days).toFixed(1);
-        st.attendanceRate = st.enrolled > 0 ? ((st.averageDaily / st.enrolled) * 100).toFixed(1) : 0;
-
-        if (parseFloat(st.averageDaily) > highestAvg) {
-          highestAvg = parseFloat(st.averageDaily);
-          topShakhaName = st.shakha;
-        }
-      });
-
-      // KPI कार्ड्स अपडेट
-      document.getElementById('kpiTotalShakhas').textContent = shakhas.length;
-      document.getElementById('kpiTotalAttendance').textContent = nagarTotalPresent;
-      const nagarAvg = shakhas.length > 0 ? (nagarTotalPresent / shakhas.length).toFixed(1) : 0;
-      document.getElementById('kpiAvgAttendance').textContent = nagarAvg;
-      document.getElementById('kpiTopShakha').textContent = topShakhaName;
-
-      // सांख्यिकी तालिका रेंडर
-      const tbody = document.getElementById('analyticsTableTbody');
+      const tbody = document.getElementById('samayTbody');
       tbody.innerHTML = "";
-      Object.values(stats).forEach(st => {
-        const daysCount = currentAnalyticsTimeframe === 'today' 
-          ? (st.totalPresent > 0 ? "संपन्न" : "अपूर्ण")
-          : `${st.uniqueDays.size} दिन`;
+
+      const schedules = appData.samaySarini.filter(s => (s.Shakha || "").trim() === shakha.trim());
+      const canEdit = [1, 2, 3, 4].includes(currentUser.authority) && (isNagar || shakha.trim() === currentUser.shakha.trim());
+
+      schedules.forEach(s => {
+        const kId = s.Karyakarta;
+        const karyakartaObj = appData.students.find(st => String(st.ID) === String(kId));
+        const kName = karyakartaObj ? (karyakartaObj.SecondaryName || karyakartaObj['First Name']) : `ID: ${kId}`;
 
         const tr = document.createElement('tr');
         tr.className = "hover:bg-orange-50/30";
         tr.innerHTML = `
-          <td class="p-3 font-bold text-stone-800">${st.shakha}</td>
-          <td class="p-3 text-center text-stone-600">${st.enrolled}</td>
-          <td class="p-3 text-center text-stone-600">${daysCount}</td>
-          <td class="p-3 text-center font-semibold text-stone-800">${st.totalPresent}</td>
-          <td class="p-3 text-center bg-orange-50/70 font-bold text-saffron-800">
-            <span class="bg-saffron-100 px-3 py-1 rounded-full border border-saffron-200">
-              ${st.averageDaily}
+          <td class="p-3 font-bold text-saffron-900">${s.Day}</td>
+          <td class="p-3 text-stone-600">${s.Shakha}</td>
+          <td class="p-3 font-semibold text-stone-800">${s.Karyakram}</td>
+          <td class="p-3 text-stone-700">
+            <span class="bg-orange-100 text-orange-800 px-2.5 py-0.5 rounded-full text-xs font-bold">
+              ${kName}
             </span>
           </td>
-          <td class="p-3 text-center font-bold text-emerald-700">${st.attendanceRate}%</td>
+          <td class="p-3 text-center">
+            ${canEdit ? `
+              <button onclick="openSamayEditModal('${s.Shakha}', '${s.Day}', '${escape(s.Karyakram)}', '${s.Karyakarta}')" class="text-xs bg-saffron-100 hover:bg-saffron-200 text-saffron-800 font-bold px-2.5 py-1 rounded">
+                <i class="fa-solid fa-pen"></i> संपादन
+              </button>
+            ` : '<span class="text-stone-400 text-xs">सुरक्षित</span>'}
+          </td>
         `;
         tbody.appendChild(tr);
       });
-
-      // चार्ट्स तैयार करना
-      renderAnalyticsCharts(stats);
     }
 
-    function renderAnalyticsCharts(stats) {
-      const shakhaNames = Object.keys(stats);
-      const avgData = shakhaNames.map(s => stats[s].averageDaily);
-      const enrolledData = shakhaNames.map(s => stats[s].enrolled);
+    function openSamayEditModal(shakha, day, karyakramEsc, currentKaryakartaId) {
+      document.getElementById('samayEditShakha').value = shakha;
+      document.getElementById('samayEditDay').value = day;
+      document.getElementById('samayEditDisplay').textContent = `${day} - ${shakha} शाखा`;
+      document.getElementById('samayEditKaryakram').value = unescape(karyakramEsc);
 
-      // चार्ट 1: शाखावार औसत उपस्थिति
-      const ctx1 = document.getElementById('analyticsChart1').getContext('2d');
-      if (chart1Instance) chart1Instance.destroy();
-
-      document.getElementById('chart1Title').innerHTML = currentAnalyticsTimeframe === 'today'
-        ? '<i class="fa-solid fa-chart-column text-saffron-600"></i> आज की उपस्थिति (शाखावार तुलना)'
-        : `<i class="fa-solid fa-chart-column text-saffron-600"></i> ${currentAnalyticsTimeframe === 'week' ? 'साप्ताहिक' : 'मासिक'} औसत उपस्थिति (प्रति शाखा)`;
-
-      chart1Instance = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-          labels: shakhaNames,
-          datasets: [
-            {
-              label: 'औसत उपस्थिति',
-              data: avgData,
-              backgroundColor: '#ea580c',
-              borderRadius: 6
-            },
-            {
-              label: 'कुल नामांकित स्वयंसेवक',
-              data: enrolledData,
-              backgroundColor: '#fed7aa',
-              borderRadius: 6
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'top', labels: { font: { family: 'Mukta' } } }
-          },
-          scales: {
-            y: { beginAtZero: true }
-          }
-        }
+      const kSel = document.getElementById('samayEditKaryakarta');
+      kSel.innerHTML = "";
+      const shakhaStudents = appData.students.filter(s => (s.Shakha || "").trim() === shakha.trim());
+      shakhaStudents.forEach(st => {
+        const opt = document.createElement('option');
+        opt.value = st.ID;
+        opt.textContent = `${st.SecondaryName || st['First Name']} ${st['Last Name'] || ""} (${getRoleName(st.Responcibility)})`;
+        if (String(st.ID) === String(currentKaryakartaId)) opt.selected = true;
+        kSel.appendChild(opt);
       });
 
-      // चार्ट 2: दैनिक उपस्थिति गतिशीलता (Trend Chart)
-      const ctx2 = document.getElementById('analyticsChart2').getContext('2d');
-      if (chart2Instance) chart2Instance.destroy();
+      document.getElementById('samayEditModal').classList.remove('hidden');
+    }
 
-      // पिछले 7 या 14 दिनों के दैनिक लेबल्स बनाएं
-      const daysCount = currentAnalyticsTimeframe === 'today' ? 1 : (currentAnalyticsTimeframe === 'week' ? 7 : 14);
-      const dayLabels = [];
-      const trendValues = [];
+    function closeSamayEditModal() {
+      document.getElementById('samayEditModal').classList.add('hidden');
+    }
 
-      for (let i = daysCount - 1; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const dayStr = d.toISOString().split('T')[0];
-        dayLabels.push(d.toLocaleDateString('hi-IN', { weekday: 'short', day: 'numeric' }));
+    async function submitSamayEdit() {
+      const shakha = document.getElementById('samayEditShakha').value;
+      const day = document.getElementById('samayEditDay').value;
+      const karyakram = document.getElementById('samayEditKaryakram').value.trim();
+      const karyakarta = document.getElementById('samayEditKaryakarta').value;
 
-        // उस दिन कुल उपस्थिति की गिनती
-        const count = (appData.attendanceLogs || []).filter(l => {
-          if (!l.Date) return false;
-          const lDateStr = new Date(l.Date).toISOString().split('T')[0];
-          return lDateStr === dayStr;
-        }).length;
+      showNotice("समय सारिणी अद्यतित की जा रही है...", "info");
 
-        trendValues.push(count);
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "updateSamaySariniItem",
+            scheduleData: { shakha, day, karyakram, karyakarta },
+            authorId: currentUser.id
+          })
+        });
+        const resp = await res.json();
+        if (resp.success) {
+          showNotice(resp.message || "समय सारिणी सहेजी गई!", "success");
+          closeSamayEditModal();
+          loadDataFromBackend(true);
+        } else {
+          showNotice("त्रुटि: " + resp.error, "error");
+        }
+      } catch (err) {
+        showNotice("त्रुटि: " + err.message, "error");
       }
-
-      chart2Instance = new Chart(ctx2, {
-        type: 'line',
-        data: {
-          labels: dayLabels,
-          datasets: [{
-            label: 'नगर दैनिक उपस्थिति',
-            data: trendValues,
-            borderColor: '#c2410c',
-            backgroundColor: 'rgba(234, 88, 12, 0.12)',
-            fill: true,
-            tension: 0.35,
-            pointBackgroundColor: '#ea580c',
-            pointRadius: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'top', labels: { font: { family: 'Mukta' } } }
-          },
-          scales: {
-            y: { beginAtZero: true }
-          }
-        }
-      });
     }
 
     // ==========================================
-    // दैनिक गतिविधि (DAILY ROUTINE)
+    // 5. DAILY ROUTINE & UNIFORM
     // ==========================================
     async function submitDailyRoutine() {
       if (![1, 2, 6, 3, 4].includes(currentUser.authority)) {
@@ -1511,15 +1790,16 @@
       }
     }
 
-    // ==========================================
-    // गणवेश स्थिति (UNIFORM)
-    // ==========================================
     function renderUniformTable() {
-      const shakha = document.getElementById('uniformShakhaFilter').value;
+      const isNagar = isNagarAuthority();
+      let shakha = document.getElementById('uniformShakhaFilter').value;
+      if (!isNagar) shakha = currentUser.shakha;
+
       const tbody = document.getElementById('uniformTbody');
       tbody.innerHTML = "";
 
       const shakhaStudents = appData.students.filter(s => (s.Shakha || "").trim() === shakha.trim());
+      const canEdit = [1, 2, 6, 3, 4].includes(currentUser.authority) && (isNagar || shakha.trim() === currentUser.shakha.trim());
 
       shakhaStudents.forEach(st => {
         const u = appData.uniforms.find(x => String(x.ID) === String(st.ID)) || {};
@@ -1529,20 +1809,22 @@
         tr.className = "hover:bg-orange-50/30";
         tr.innerHTML = `
           <td class="p-2.5 font-semibold text-stone-800">${st.SecondaryName || st['First Name']}</td>
-          <td class="p-2.5 text-center"><input type="checkbox" id="u-topi-${st.ID}" ${u.Topi ? 'checked' : ''}></td>
-          <td class="p-2.5 text-center"><input type="checkbox" id="u-belt-${st.ID}" ${u.Belt ? 'checked' : ''}></td>
-          <td class="p-2.5 text-center"><input type="checkbox" id="u-shoes-${st.ID}" ${u.Shoes ? 'checked' : ''}></td>
-          <td class="p-2.5 text-center"><input type="checkbox" id="u-sox-${st.ID}" ${u.Sox ? 'checked' : ''}></td>
-          <td class="p-2.5 text-center"><input type="checkbox" id="u-shirt-${st.ID}" ${u.Shirt ? 'checked' : ''}></td>
-          <td class="p-2.5 text-center"><input type="checkbox" id="u-pant-${st.ID}" ${u.Pant ? 'checked' : ''}></td>
-          <td class="p-2.5 text-center"><input type="checkbox" id="u-dand-${st.ID}" ${u.Dand ? 'checked' : ''}></td>
+          <td class="p-2.5 text-center"><input type="checkbox" id="u-topi-${st.ID}" ${u.Topi ? 'checked' : ''} ${!canEdit ? 'disabled' : ''}></td>
+          <td class="p-2.5 text-center"><input type="checkbox" id="u-belt-${st.ID}" ${u.Belt ? 'checked' : ''} ${!canEdit ? 'disabled' : ''}></td>
+          <td class="p-2.5 text-center"><input type="checkbox" id="u-shoes-${st.ID}" ${u.Shoes ? 'checked' : ''} ${!canEdit ? 'disabled' : ''}></td>
+          <td class="p-2.5 text-center"><input type="checkbox" id="u-sox-${st.ID}" ${u.Sox ? 'checked' : ''} ${!canEdit ? 'disabled' : ''}></td>
+          <td class="p-2.5 text-center"><input type="checkbox" id="u-shirt-${st.ID}" ${u.Shirt ? 'checked' : ''} ${!canEdit ? 'disabled' : ''}></td>
+          <td class="p-2.5 text-center"><input type="checkbox" id="u-pant-${st.ID}" ${u.Pant ? 'checked' : ''} ${!canEdit ? 'disabled' : ''}></td>
+          <td class="p-2.5 text-center"><input type="checkbox" id="u-dand-${st.ID}" ${u.Dand ? 'checked' : ''} ${!canEdit ? 'disabled' : ''}></td>
           <td class="p-2.5 text-center font-bold ${isComplete ? 'text-emerald-600' : 'text-stone-400'}">
             ${isComplete ? '<i class="fa-solid fa-circle-check text-emerald-500"></i> पूर्ण' : '<i class="fa-regular fa-circle"></i> अपूर्ण'}
           </td>
           <td class="p-2.5 text-center">
-            <button onclick="saveStudentUniform(${st.ID}, '${shakha}')" class="bg-saffron-100 hover:bg-saffron-200 text-saffron-800 text-xs px-2.5 py-1 rounded font-semibold transition">
-              सेव
-            </button>
+            ${canEdit ? `
+              <button onclick="saveStudentUniform(${st.ID}, '${shakha}')" class="bg-saffron-100 hover:bg-saffron-200 text-saffron-800 text-xs px-2.5 py-1 rounded font-semibold transition">
+                सेव
+              </button>
+            ` : '<span class="text-stone-400 text-xs">-</span>'}
           </td>
         `;
         tbody.appendChild(tr);
@@ -1550,11 +1832,6 @@
     }
 
     async function saveStudentUniform(studentId, shakha) {
-      if (![1, 2, 6, 3, 4].includes(currentUser.authority)) {
-        alert("गणवेश अपडेट की अनुमति नहीं है।");
-        return;
-      }
-
       const uniformData = {
         id: studentId,
         shakha: shakha,
@@ -1588,43 +1865,12 @@
     }
 
     // ==========================================
-    // समय सारिणी (SAMAY SARINI)
-    // ==========================================
-    function renderSamaySarini() {
-      const shakha = document.getElementById('samayShakhaFilter').value;
-      const tbody = document.getElementById('samayTbody');
-      tbody.innerHTML = "";
-
-      const schedules = appData.samaySarini.filter(s => (s.Shakha || "").trim() === shakha.trim());
-      schedules.forEach(s => {
-        const kId = s.Karyakarta;
-        const karyakartaObj = appData.students.find(st => String(st.ID) === String(kId));
-        const kName = karyakartaObj ? (karyakartaObj.SecondaryName || karyakartaObj['First Name']) : `कार्यकर्ता ID: ${kId}`;
-
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-orange-50/30";
-        tr.innerHTML = `
-          <td class="p-3 font-bold text-saffron-900">${s.Day}</td>
-          <td class="p-3 text-stone-600">${s.Shakha}</td>
-          <td class="p-3 font-semibold text-stone-800">${s.Karyakram}</td>
-          <td class="p-3 text-stone-700">
-            <span class="bg-orange-100 text-orange-800 px-2.5 py-0.5 rounded-full text-xs font-bold">
-              ${kName}
-            </span>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // ==========================================
-    // शाखा प्रबंधन (COURSES - AUTHORITY 3, 4)
+    // 6. COURSE MANAGEMENT & MAIL
     // ==========================================
     function renderCourseTable() {
       const tbody = document.getElementById('courseTbody');
       tbody.innerHTML = "";
-
-      const isNagarLead = [3, 4].includes(currentUser.authority);
+      const isNagarLead = isNagarAuthority();
       document.getElementById('addShakhaContainer').style.display = isNagarLead ? "block" : "none";
 
       appData.courses.forEach(c => {
@@ -1646,8 +1892,8 @@
     }
 
     async function submitAddShakha() {
-      if (![3, 4].includes(currentUser.authority)) {
-        alert("शाखा जोड़ने का अधिकार केवल नगर कार्यवाह (3) और नगर सह कार्यवाह (4) को है।");
+      if (!isNagarAuthority()) {
+        alert("केवल नगर कार्यवाह (3) और नगर सह कार्यवाह (4) ही शाखा जोड़ सकते हैं।");
         return;
       }
       const shakhaName = document.getElementById('newShakhaName').value.trim();
@@ -1691,9 +1937,6 @@
       }
     }
 
-    // ==========================================
-    // ईमेल ट्रिगर टेस्ट
-    // ==========================================
     async function triggerManualMail() {
       if (!confirm("क्या आप अभी 9:30 AM का दैनिक उपस्थिति प्रतिवेदन संबंधित अधिकारियों को भेजना चाहते हैं?")) return;
       showNotice("प्रतिवेदन ईमेल भेजा जा रहा है...", "info");
@@ -1709,10 +1952,10 @@
     }
 
     // ==========================================
-    // UI एवं टैब नियंत्रण
+    // 7. TAB & MODAL HELPERS
     // ==========================================
     function switchTab(tabId) {
-      const tabs = ['attendance', 'analytics', 'directory', 'routine', 'uniform', 'samay', 'courses'];
+      const tabs = ['attendance', 'analytics', 'directory', 'samay', 'routine', 'uniform', 'courses'];
       tabs.forEach(t => {
         document.getElementById(`section-${t}`).classList.add('hidden');
         document.getElementById(`tab-${t}`).classList.remove('tab-active');
@@ -1720,9 +1963,8 @@
       document.getElementById(`section-${tabId}`).classList.remove('hidden');
       document.getElementById(`tab-${tabId}`).classList.add('tab-active');
 
-      if (tabId === 'analytics') {
-        renderAnalyticsDashboard();
-      }
+      if (tabId === 'analytics') renderAnalyticsDashboard();
+      if (tabId === 'samay') renderSamaySarini();
     }
 
     function showNotice(msg, type) {
@@ -1752,13 +1994,11 @@
           id: student.ID,
           name: `${student['First Name']} ${student['Last Name']}`,
           secondaryName: student.SecondaryName || student['First Name'],
-          shakha: student.Shakha,
+          shakha: String(student.Shakha || "").trim(),
           authority: parseInt(student.Responcibility, 10),
           email: student.Email
         };
-        renderCurrentUserDisplay();
-        renderCourseTable();
-        renderDirectoryTable();
+        setupUI();
         closeLoginModal();
         showNotice(`सक्रिय दायित्व: "${currentUser.secondaryName}" (${getRoleName(currentUser.authority)})`, "success");
       }
